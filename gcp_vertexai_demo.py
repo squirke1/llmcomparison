@@ -172,7 +172,7 @@ def generate():
         # Write header row
         writer.writerow([
             "Run", "Response Time (s)", "Prompt Tokens", "Completion Tokens", "Total Tokens",
-            "Characters", "Words", "Cost (USD)", "Location", "Timestamp", "Response"
+            "Characters", "Words", "Cost (USD)", "Region", "Timestamp", "Response"
         ])
         # Write each run's data
         for i in range(num_runs):

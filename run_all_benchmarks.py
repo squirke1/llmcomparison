@@ -64,13 +64,33 @@ for name, _, csv_file in scripts:
     with open(csv_file, newline='', encoding='utf-8') as f:
         reader = csv.reader(f)
         rows = list(reader)
-        # Find the row that starts with "Average"
+        # Accept either "Region" or "Location" for the region column
+        header_row = next(
+            (row for row in rows if row and ("Region" in row or "Location" in row) and "Timestamp" in row),
+            None
+        )
         avg_row = next((row for row in rows if row and row[0].strip().lower() == "average"), None)
-        if avg_row:
-            # Only keep the relevant columns (skip the last column if it's empty or the response)
-            summary_rows.append([name] + avg_row[1:8])
+        if header_row and avg_row:
+            # Get index for region/location and timestamp
+            region_idx = header_row.index("Region") if "Region" in header_row else (
+                header_row.index("Location") if "Location" in header_row else -1
+            )
+            timestamp_idx = header_row.index("Timestamp") if "Timestamp" in header_row else -1
+            summary = [
+                name,
+                avg_row[1],  # Average Response Time (s)
+                avg_row[2],  # Average Prompt Tokens
+                avg_row[3],  # Average Completion Tokens
+                avg_row[4],  # Average Total Tokens
+                avg_row[5],  # Average Characters
+                avg_row[6],  # Average Words
+                avg_row[7],  # Average Cost
+                avg_row[region_idx] if region_idx != -1 else "",
+                avg_row[timestamp_idx] if timestamp_idx != -1 else "",
+            ]
+            summary_rows.append(summary)
         else:
-            print(f"Warning: No averages found in {csv_file}")
+            print(f"Warning: No averages or header found in {csv_file}")
 
 # Write the summary CSV
 with open(summary_csv, mode="w", newline="", encoding="utf-8") as f:

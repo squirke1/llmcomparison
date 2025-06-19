@@ -1,0 +1,10 @@
+Metric,Azure OpenAI,GCP Vertex AI,AWS Bedrock Claude
+Avg. Response Time (s),7.67,27.15,22.47
+Avg. Prompt Tokens,38.00,29.00,35.00
+Avg. Completion Tokens,918.80,1030.20,809.00
+Avg. Total Tokens,956.80,2522.40,844.00
+Avg. Characters,4806.60,5188.40,4147.00
+Avg. Words,642.20,724.20,589.60
+Avg. Cost,0.007426,0.010338,0.012240
+Region,eastus2,global,us-east-1
+Timestamp,2025-06-20T00:29:45.203401,2025-06-20T00:32:01.394488,2025-06-20T00:33:54.035206

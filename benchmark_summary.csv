@@ -1,4 +1,0 @@
-Provider,Average Response Time (s),Average Prompt Tokens,Average Completion Tokens,Average Total Tokens,Average Characters,Average Words,Average Cost,Region,Timestamp
-Azure OpenAI,8.44,38.00,932.80,970.80,4913.80,650.00,
-GCP Vertex AI,24.17,29,975.4,2563.2,4879.4,685.6,
-AWS Bedrock Claude,0.00,0.00,0.00,0.00,0.00,0.00,0.000000
