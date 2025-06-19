@@ -51,7 +51,10 @@ header = [
     "Average Completion Tokens",
     "Average Total Tokens",
     "Average Characters",
-    "Average Words"
+    "Average Words",
+    "Average Cost",
+    "Region",
+    "Timestamp"
 ]
 
 for name, _, csv_file in scripts:
@@ -90,7 +93,10 @@ metric_names = [
     "Avg. Completion Tokens",
     "Avg. Total Tokens",
     "Avg. Characters",
-    "Avg. Words"
+    "Avg. Words",
+    "Avg. Cost",
+    "Region",
+    "Timestamp"
 ]
 
 # Prepare transposed rows: first row is header, then one row per metric

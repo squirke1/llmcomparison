@@ -5,6 +5,7 @@ import os
 import time
 import csv
 import argparse
+import datetime
 from google import genai
 from google.genai import types
 
@@ -32,14 +33,17 @@ def generate():
     if not project_id:
         raise ValueError("GOOGLE_CLOUD_PROJECT environment variable is not set.")
 
+    # Set the location as a variable (can be changed as needed)
+    location = "global"
+
     # Initialize the Vertex AI client for Gemini models
     client = genai.Client(
         vertexai=True,
         project=project_id,
-        location="global",
+        location=location,
     )
 
-    model = "gemini-2.5-pro-preview-06-05"  # Model name to use
+    model = "gemini-2.5-pro"  # Model name to use
 
     # Use the prompt from the command line
     contents = [
@@ -85,6 +89,13 @@ def generate():
     completion_tokens_list = []
     total_tokens_list = []
     responses = []
+    timestamps = []  # New list to store timestamps
+
+    # Pricing for Gemini 2.5 Pro (June 2025)
+    input_token_price = 0.00125  # USD per 1K input tokens
+    output_token_price = 0.01  # USD per 1K output tokens
+
+    costs = []
 
     # Run the API call multiple times to gather statistics
     for i in range(num_runs):
@@ -117,9 +128,19 @@ def generate():
         completion_tokens_list.append(completion_tokens)
         total_tokens_list.append(total_tokens)
 
+        # Calculate cost for this run
+        input_cost = (prompt_tokens / 1000) * input_token_price
+        output_cost = (completion_tokens / 1000) * output_token_price
+        total_cost = input_cost + output_cost
+        costs.append(total_cost)
+
         # Count characters and words in the response
         char_count = len(full_response)
         word_count = len(full_response.split())
+
+        # Add timestamp for when the model completes
+        completion_time = datetime.datetime.now().isoformat()
+        timestamps.append(completion_time)
 
         # Print metrics for this run
         print(f"Run {i+1}:")
@@ -128,8 +149,11 @@ def generate():
         print(f"Prompt tokens: {prompt_tokens}")
         print(f"Completion tokens: {completion_tokens}")
         print(f"Total tokens: {total_tokens}")
+        print(f"Total cost: ${total_cost:.6f}")
         print(f"Characters: {char_count}")
         print(f"Words: {word_count}")
+        print(f"Region: {location}")
+        print(f"Timestamp: {completion_time}")
         print("-" * 40)
 
     # Print averages for all runs
@@ -138,13 +162,17 @@ def generate():
     print(f"Average prompt tokens: {sum(prompt_tokens_list)/num_runs:.2f}")
     print(f"Average completion tokens: {sum(completion_tokens_list)/num_runs:.2f}")
     print(f"Average total tokens: {sum(total_tokens_list)/num_runs:.2f}")
+    print(f"Average total cost: ${sum(costs)/num_runs:.6f}")
+    print(f"Region: {location}")
+    print(f"Timestamp: {completion_time}")
 
     # Write all results to a CSV file for later analysis
     with open(csv_filename, mode="w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
         # Write header row
         writer.writerow([
-            "Run", "Response Time (s)", "Prompt Tokens", "Completion Tokens", "Total Tokens", "Characters", "Words", "Response"
+            "Run", "Response Time (s)", "Prompt Tokens", "Completion Tokens", "Total Tokens",
+            "Characters", "Words", "Cost (USD)", "Location", "Timestamp", "Response"
         ])
         # Write each run's data
         for i in range(num_runs):
@@ -159,6 +187,9 @@ def generate():
                 total_tokens_list[i],
                 char_count,
                 word_count,
+                f"{costs[i]:.6f}",
+                location,
+                timestamps[i],
                 resp_text.replace('\n', ' ')
             ])
         # Write averages row
@@ -171,6 +202,9 @@ def generate():
             f"{sum(total_tokens_list)/num_runs:.2f}",
             f"{sum(len(r) for r in responses)/num_runs:.2f}",
             f"{sum(len(r.split()) for r in responses)/num_runs:.2f}",
+            f"{sum(costs)/num_runs:.6f}",
+            location,
+            timestamps[i],
             ""
         ])
 

@@ -5,7 +5,8 @@ import json
 import time
 import csv
 import argparse
-from botocore.exceptions import ClientError
+import sys
+import datetime
 
 # Parse command-line arguments for the question and CSV filename
 parser = argparse.ArgumentParser(description="Benchmark AWS Bedrock Claude model responses.")
@@ -26,9 +27,9 @@ prompt = args.question
 csv_filename = args.csv
 
 # Set up Bedrock runtime client and model details
-client = boto3.client("bedrock-runtime", region_name="us-east-1")
-model_id = "anthropic.claude-sonnet-4-20250514-v1:0"
-
+region_name = "us-east-1"  # Set region as a variable
+client = boto3.client("bedrock-runtime", region_name=region_name)
+model_id = "anthropic.claude-3-sonnet-20240229-v1:0"
 num_runs = 5
 
 # Lists to store metrics for each run
@@ -38,6 +39,7 @@ prompt_tokens_list = []
 total_tokens_list = []
 responses = []
 costs = []
+timestamps = []  # New list to store timestamps
 
 # Pricing for Claude 3 Sonnet (update if you use a different model)
 input_token_price = 0.003  # USD per 1K input tokens
@@ -67,15 +69,15 @@ for i in range(num_runs):
         end_time = time.time()
         elapsed = end_time - start_time
         response_times.append(elapsed)
-    except (ClientError, Exception) as e:
+    except Exception as e:
         print(f"ERROR: Can't invoke '{model_id}'. Reason: {e}")
-        # Append placeholders so all lists stay in sync
         response_times.append(0)
         responses.append("")
         prompt_tokens_list.append(0)
         completion_tokens_list.append(0)
         total_tokens_list.append(0)
         costs.append(0)
+        timestamps.append("")  # Keep lists in sync
         continue
 
     # Decode the response body
@@ -105,6 +107,10 @@ for i in range(num_runs):
     total_cost = input_cost + output_cost
     costs.append(total_cost)
 
+    # Add timestamp for when the model completes
+    completion_time = datetime.datetime.now().isoformat()
+    timestamps.append(completion_time)
+
     # Count characters and words
     char_count = len(resp_text)
     word_count = len(resp_text.split())
@@ -118,6 +124,8 @@ for i in range(num_runs):
     print(f"Total tokens: {total_tokens}")
     print(f"Characters: {char_count}")
     print(f"Words: {word_count}")
+    print(f"Region: {region_name}")
+    print(f"Timestamp: {completion_time}")
     print("-" * 40)
 
 # Write all results to a CSV file for later analysis
@@ -125,7 +133,8 @@ with open(csv_filename, mode="w", newline="", encoding="utf-8") as csvfile:
     writer = csv.writer(csvfile)
     # Write header row
     writer.writerow([
-        "Run", "Response Time (s)", "Prompt Tokens", "Completion Tokens", "Total Tokens", "Characters", "Words", "Cost (USD)", "Response"
+        "Run", "Response Time (s)", "Prompt Tokens", "Completion Tokens", "Total Tokens",
+        "Characters", "Words", "Cost (USD)", "Region", "Timestamp", "Response"
     ])
     # Write each run's data
     for i in range(num_runs):
@@ -141,6 +150,8 @@ with open(csv_filename, mode="w", newline="", encoding="utf-8") as csvfile:
             char_count,
             word_count,
             f"{costs[i]:.6f}",
+            region_name,
+            timestamps[i],
             resp_text.replace('\n', ' ')
         ])
     # Write averages row
@@ -154,6 +165,8 @@ with open(csv_filename, mode="w", newline="", encoding="utf-8") as csvfile:
         f"{sum(len(r) for r in responses)/num_runs:.2f}",
         f"{sum(len(r.split()) for r in responses)/num_runs:.2f}",
         f"{sum(costs)/num_runs:.6f}",
+        region_name,
+        timestamps[i],
         ""
     ])
 
@@ -167,3 +180,5 @@ print(f"Average completion tokens: {sum(completion_tokens_list)/num_runs:.2f}")
 print(f"Average total tokens: {sum(total_tokens_list)/num_runs:.2f}")
 print(f"Average characters: {sum(len(r) for r in responses)/num_runs:.2f}")
 print(f"Average words: {sum(len(r.split()) for r in responses)/num_runs:.2f}")
+
+print(sys.prefix != sys.base_prefix)
