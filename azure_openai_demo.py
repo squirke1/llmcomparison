@@ -49,8 +49,8 @@ client = AzureOpenAI(
 )
 
 # Pricing for GPT-4.1 (June 2025)
-input_token_price = 2.0 / 1000    # $2 per 1K input tokens
-output_token_price = 8.0 / 1000   # $8 per 1K output tokens
+input_token_price = 2.0 / 1000 
+output_token_price = 8.0 / 1000
 
 num_runs = 5  # Number of times to call the API for benchmarking
 
