@@ -1,4 +1,4 @@
 Provider,Average Response Time (s),Average Prompt Tokens,Average Completion Tokens,Average Total Tokens,Average Characters,Average Words,Average Cost,Region,Timestamp
-Azure OpenAI,7.55,38.00,964.40,1002.40,4981.60,645.00,0.007791,eastus2,2025-06-20T23:13:29.170849
-GCP Vertex AI,25.98,29.00,953.20,2478.80,4920.20,684.80,0.009568,global,2025-06-20T23:15:39.594179
-AWS Bedrock Claude,23.83,35.00,797.80,832.80,4130.00,579.20,0.012072,us-east-1,2025-06-20T23:17:39.093207
+Azure OpenAI,7.55,38,964.4,1002.4,4981.6,645,0.007791,eastus2,2025-06-20T23:13:29.170849
+GCP Vertex AI,25.98,29,2449.8,2478.8,4920.2,684.8,0.009568,global,2025-06-20T23:15:39.594179
+AWS Bedrock Claude,23.83,35,797.8,832.8,4130,579.2,0.012072,us-east-1,2025-06-20T23:17:39.093207
